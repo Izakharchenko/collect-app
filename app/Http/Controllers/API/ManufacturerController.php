@@ -1,7 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreManufacturerRequest;
+use App\Http\Resources\ManufacturerResource;
 use App\Models\Manufacturer;
 use Illuminate\Http\Request;
 
@@ -14,7 +17,7 @@ class ManufacturerController extends Controller
      */
     public function index()
     {
-        return Manufacturer::select('name')->get();
+        return ManufacturerResource::collection(Manufacturer::select('name')->get());
     }
 
     /**
@@ -23,9 +26,13 @@ class ManufacturerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreManufacturerRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        Manufacturer::create($validated);
+
+        return response()->json(['message' => 'Created'], 201);
     }
 
     /**
@@ -36,7 +43,7 @@ class ManufacturerController extends Controller
      */
     public function show(Manufacturer $manufacturer)
     {
-        //
+        return new ManufacturerResource($manufacturer);
     }
 
     /**
@@ -46,9 +53,13 @@ class ManufacturerController extends Controller
      * @param  \App\Models\Manufacturer  $manufacturer
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Manufacturer $manufacturer)
+    public function update(StoreManufacturerRequest $request, Manufacturer $manufacturer)
     {
-        //
+        $validated = $request->validated();
+
+        Manufacturer::update($validated);
+
+        return response()->json(['message' => 'Updated'], 202);
     }
 
     /**
@@ -59,6 +70,10 @@ class ManufacturerController extends Controller
      */
     public function destroy(Manufacturer $manufacturer)
     {
-        //
+        $isDeleted = $manufacturer->delete();
+        if ($isDeleted) {
+            return response()->json(['message' => 'Deleted'], 203);
+        }
+        return response()->json(['message' => 'Not allowed'], 403);
     }
 }
